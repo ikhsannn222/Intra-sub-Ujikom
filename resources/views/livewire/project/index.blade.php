@@ -12,21 +12,14 @@
                 class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
                 + Add Data
             </a>
+            <div class="relative w-1/2">
+                <i class='bx bx-search absolute left-3 mt-2  transform  text-gray-400'></i>
+                <input type="text"
+                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-500 text-sm w-full"
+                    wire:model.live="search" placeholder="Search Project...">
+            </div>
         @endcan
     </h2>
-
-    <!-- Pilihan Filter -->
-    <div class="flex space-x-4 items-center mb-6">
-        <div class="relative w-1/2">
-            <i class='bx bx-search absolute left-3 mt-2 transform text-gray-400'></i>
-            <input type="text"
-                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-500 text-sm w-full"
-                wire:model.live="search" placeholder="Search Project...">
-        </div>
-
-
-    </div>
-
     <div x-data="{ open: false }" class="relative w-full mb-4">
         <!-- Filters Button -->
         <button @click="open = !open"
