@@ -39,14 +39,13 @@
     </div>
 @endif
 
-
 <div x-data="{ open: false }" class="relative w-full">
     <!-- Filters Button -->
     <button @click="open = !open"
         class="text-gray-600 text-sm bg-gray-100 p-2 px-4 rounded-md mb-3 w-full flex items-center justify-between border border-gray-300">
         <span class="flex items-center space-x-1 text-sm text-gray-400">
-            <i class="bx bx-filter text-xl"></i> <!-- Ikon user -->
-            <span>Filter</span> <!-- Teks nama user -->
+            <i class="bx bx-filter text-xl"></i>
+            <span>Filter</span>
         </span>
         <svg class="w-4 h-4 transform transition-transform" :class="{ 'rotate-180': open }"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,14 +54,12 @@
     </button>
 
     <!-- Dropdown Menu for Filters -->
-    <div x-show="open" x-transition.origin.top.duration.300ms
-        class="mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-full p-4" wire:ignore>
+    <div x-show="open" x-transition.origin.top.duration.300ms class="mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-full p-4" wire:ignore>
         <div class="flex flex-wrap gap-4">
             <!-- Owners / Responsibles Filter -->
             <div class="w-1/4">
                 <label class="block text-gray-600 text-sm mb-1">Owners / Responsibles</label>
-                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300"
-                    wire:model.live="selectedResponsible">
+                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300" wire:model.live="selectedResponsible">
                     <option value="">Select an option</option>
                     @foreach ($responsibles as $responsible)
                         <option value="{{ $responsible->id }}">{{ $responsible->name }}</option>
@@ -73,8 +70,7 @@
             <!-- Ticket Types Filter -->
             <div class="w-1/4">
                 <label class="block text-gray-600 text-sm mb-1">Task types</label>
-                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300"
-                    wire:model.live="selectedType">
+                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300" wire:model.live="selectedType">
                     <option value="">Select an option</option>
                     @foreach ($types as $type)
                         <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -85,23 +81,22 @@
             <!-- Task Priorities Filter -->
             <div class="w-1/4">
                 <label class="block text-gray-600 text-sm mb-1">Task priorities</label>
-                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300"
-                    wire:model.live="selectedPriority">
+                <select class="bg-gray-100 p-2 rounded w-full border border-gray-300" wire:model.live="selectedPriority">
                     <option value="">Select an option</option>
                     @foreach ($priorities as $priority)
                         <option value="{{ $priority->id }}">{{ $priority->name }}</option>
                     @endforeach
                 </select>
             </div>
-
         </div>
 
         <!-- Filter and Reset Buttons -->
         <div class="flex justify-end space-x-2 mt-4">
-            <button @click="open = false" class="bg-gray-500 text-white px-4 py-2 rounded">Reset filters</button>
+            <button wire:click="resetFilters" class="bg-gray-500 text-white px-4 py-2 rounded">Reset filters</button>
         </div>
     </div>
 </div>
+
 
 <div class="flex space-x-4">
     @foreach ($statuses as $status)
@@ -266,7 +261,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span>Warning: Task ini sudah mencapai deadline</span>
+                    <span>Peringatan: Task ini sudah mencapai deadline</span>
                 </div>
             @endif
         </div>
