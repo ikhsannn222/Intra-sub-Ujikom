@@ -96,8 +96,6 @@
         </div>
     </div>
 </div>
-
-
 <div class="flex space-x-4">
     @foreach ($statuses as $status)
         <!-- Kontainer Status -->
@@ -109,12 +107,13 @@
             </h2>
 
             <!-- Kontainer Tugas -->
-            <div id="status-{{ $status->id }}" class="bg-gray-300 space-y-2 max-h-[500px] overflow-y-auto">
+            <div id="status-{{ $status->id }}" class="bg-transparent space-y-2">
                 @foreach ($status->tasks as $task)
-                    <!-- Task dengan Background Putih, Border, Shadow, dan Teks Hitam -->
+                    <!-- Task dengan Efek Membesar saat Hover -->
                     <div id="task-{{ $task->id }}"
-                        class="bg-white border border-gray-300 p-2 rounded shadow-lg text-black" draggable="true"
-                        ondragstart="drag(event, {{ $task->id }})">
+                        class="bg-white border border-gray-300 p-2 rounded shadow-lg text-black transition-transform duration-300 ease-in-out hover:scale-105"
+                        draggable="true" ondragstart="drag(event, {{ $task->id }})">
+
                         <!-- Nama Task -->
                         <div class="flex justify-between items-center mb-4">
                             <span class="space-x-4 flex">
@@ -154,6 +153,7 @@
                             <div
                                 class="flex items-center space-x-1 text-sm
                                 {{ $task->end_date && \Carbon\Carbon::parse($task->end_date)->isPast() && ($task->status->id ?? 0 ) < 3 ? 'text-red-500' : 'text-gray-700' }}">
+
                                 <i class="bx bx-calendar text-lg"></i>
                                 <span>
                                     {{ $task->start_date ? \Carbon\Carbon::parse($task->start_date)->format('M d') : '' }}
@@ -168,7 +168,6 @@
                                 wire:click="openTaskModal({{ $task->id }})">
                                 <i class='bx bx-show text-xl' style="color: {{ $status->color }}"></i>
                             </button>
-
 
                             <!-- Tombol Delete -->
                             @if ($status->name === 'Archived')
@@ -210,6 +209,7 @@
         </div>
     @endforeach
 </div>
+
 @if ($showTaskModal && $selectedTask)
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
         <div class="bg-white p-8 rounded-lg shadow-2xl max-w-3xl w-full relative space-y-6">
