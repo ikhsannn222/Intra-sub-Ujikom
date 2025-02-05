@@ -211,7 +211,6 @@
         </div>
     @endforeach
 </div>
-
 @if ($showTaskModal && $selectedTask)
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
         <div class="bg-white p-8 rounded-lg shadow-2xl max-w-3xl w-full relative space-y-6">
@@ -238,38 +237,59 @@
                 <p><strong>Dibuat oleh:</strong> {{ $selectedTask->owner->name }}</p>
                 <p><strong>Responsible:</strong> {{ $selectedTask->responsible->name }}</p>
                 <p><strong>Priority:</strong> {{ $selectedTask->priority->name }}</p>
-                <p><strong>Start Date:</strong> {{ $selectedTask->start_date }}</p>
-                <p><strong>End Date:</strong> {{ $selectedTask->end_date }}</p>
+
+                @php
+                    $deadlineDate = \Carbon\Carbon::parse($selectedTask->end_date)->startOfDay();
+                    $currentDate = \Carbon\Carbon::today();
+                    $daysDifference = $currentDate->diffInDays($deadlineDate, false);
+                    $isOverdue = $daysDifference < 0 && $selectedTask->status->id != 3;
+                @endphp
+
+                <!-- Task Deadline -->
+                <p>
+                    <strong>Start Date:</strong> {{ \Carbon\Carbon::parse($selectedTask->start_date)->format('d M Y') }}
+                </p>
+                <p>
+                    <strong>End Date:</strong>
+                    <span class="{{ $isOverdue ? 'text-red-500' : 'text-gray-500' }}">
+                        {{ \Carbon\Carbon::parse($selectedTask->end_date)->format('d M Y') }}
+                    </span>
+                </p>
             </div>
 
             <!-- Alerts for Deadline Warnings -->
-            @if (
-                $selectedTask->end_date &&
-                Carbon\Carbon::now()->diffInDays(Carbon\Carbon::parse($selectedTask->end_date), false) <= 1 &&
-                Carbon\Carbon::now()->lt(Carbon\Carbon::parse($selectedTask->end_date))
-            )
+            @if ($selectedTask->status->id == 3)
+                <div role="alert" class="bg-green-200 text-black p-4 rounded-xl shadow-md flex items-center space-x-4 mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Task sudah selesai dikerjakan.</span>
+                </div>
+            @elseif ($daysDifference == 1)
+                <div role="alert" class="bg-orange-200 text-black p-4 rounded-xl shadow-md flex items-center space-x-4 mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Perhatian: Task ini akan mencapai deadline BESOK.</span>
+                </div>
+            @elseif ($daysDifference > 1)
                 <div role="alert" class="bg-yellow-200 text-black p-4 rounded-xl shadow-md flex items-center space-x-4 mt-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span>Warning: Task ini akan mencapai deadline dalam {{ Carbon\Carbon::parse($selectedTask->end_date)->diffForHumans() }}</span>
+                    <span>Task ini akan mencapai deadline dalam {{ $daysDifference }} hari.</span>
                 </div>
-            @endif
-
-            @if ($selectedTask->end_date && Carbon\Carbon::now()->gt(Carbon\Carbon::parse($selectedTask->end_date)))
+            @elseif ($isOverdue)
                 <div role="alert" class="bg-red-300 text-black p-4 rounded-xl shadow-md flex items-center space-x-4 mt-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span>Peringatan: Task ini sudah mencapai deadline</span>
+                    <span>Peringatan: Task ini sudah melewati deadline {{ abs($daysDifference) }} hari yang lalu.</span>
                 </div>
             @endif
         </div>
     </div>
 @endif
-
-
-
 
 @if ($editingTaskId)
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
@@ -411,7 +431,7 @@
                 <h3 class="text-xl font-semibold">Create Task</h3>
 
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @foreach ([['label' => 'Task Name', 'model' => 'newTask.name', 'type' => 'text'], ['label' => 'Content', 'model' => 'newTask.content', 'type' => 'textarea'], ['label' => 'Owner', 'model' => 'newTask.owner_id', 'type' => 'select', 'options' => $owners], ['label' => 'Start Date', 'model' => 'newTask.start_date', 'type' => 'date'], ['label' => 'End Date', 'model' => 'newTask.end_date', 'type' => 'date'], ['label' => 'Responsible', 'model' => 'newTask.responsible_id', 'type' => 'select', 'options' => $responsibles], ['label' => 'Type', 'model' => 'newTask.type_id', 'type' => 'select', 'options' => $types], ['label' => 'Priority', 'model' => 'newTask.priority_id', 'type' => 'select', 'options' => $priorities], ['label' => 'Code', 'model' => 'newTask.code', 'type' => 'text'], ['label' => 'Order', 'model' => 'newTask.order', 'type' => 'number'], ['label' => 'Estimation', 'model' => 'newTask.estimation', 'type' => 'number']] as $field)
+                    @foreach ([['label' => 'Task Name', 'model' => 'newTask.name', 'type' => 'text'], ['label' => 'Owner', 'model' => 'newTask.owner_id', 'type' => 'select', 'options' => $owners], ['label' => 'Start Date', 'model' => 'newTask.start_date', 'type' => 'date'], ['label' => 'End Date', 'model' => 'newTask.end_date', 'type' => 'date'], ['label' => 'Responsible', 'model' => 'newTask.responsible_id', 'type' => 'select', 'options' => $responsibles], ['label' => 'Type', 'model' => 'newTask.type_id', 'type' => 'select', 'options' => $types], ['label' => 'Priority', 'model' => 'newTask.priority_id', 'type' => 'select', 'options' => $priorities], ['label' => 'Code', 'model' => 'newTask.code', 'type' => 'text'], ['label' => 'Order', 'model' => 'newTask.order', 'type' => 'number'], ['label' => 'Estimation', 'model' => 'newTask.estimation', 'type' => 'number']] as $field)
                         <div class="col-span-1">
                             <label for="{{ $field['model'] }}"
                                 class="block text-sm font-medium text-gray-700">{{ $field['label'] }}</label>
@@ -433,18 +453,32 @@
                             @endif
                         </div>
                     @endforeach
+                </div>
 
-                    <div class="col-span-2 text-right mt-4">
-                        <button wire:click="saveNewTask"
-                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">
-                            Create Task
-                        </button>
-                    </div>
+                <!-- Content moved to the bottom -->
+                <div class="mt-4">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Content</span>
+                    </label>
+                    <textarea wire:model.defer="newTask.content"
+                        class="bg-gray-100 p-2 rounded w-full min-h-fit h-48"
+                        name="content" id="content"></textarea>
+                    @error('newTask.content')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="col-span-2 text-right mt-4">
+                    <button wire:click="saveNewTask"
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">
+                        Create Task
+                    </button>
                 </div>
             </div>
         </div>
     @endif
 @endcan
+
 
 
 

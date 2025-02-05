@@ -237,19 +237,6 @@ class KanbanIndex extends Component
             session()->flash('error', 'Proyek tidak ditemukan.');
         }
     }
-
-    // public function openStatusModal()
-    // {
-    //     $this->availableStatuses = Statuses::all();
-    //     $this->projectStatus     = $this->project ? $this->project->status_id : null;
-    //     $this->showStatusModal   = true;
-    // }
-
-    // public function closeStatusModal()
-    // {
-    //     $this->showStatusModal = false;
-    // }
-
     public function openTaskModal($taskId)
     {
         $this->selectedTask = Tasks::find($taskId);
