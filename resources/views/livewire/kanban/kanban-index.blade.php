@@ -153,7 +153,7 @@
                         <div class="flex justify-between items-center">
                             <div
                                 class="flex items-center space-x-1 text-sm
-                                {{ $task->end_date && \Carbon\Carbon::parse($task->end_date)->isPast() ? 'text-red-500' : 'text-gray-700' }}">
+                                {{ $task->end_date && \Carbon\Carbon::parse($task->end_date)->isPast() && ($task->status->id ?? 0 ) < 3 ? 'text-red-500' : 'text-gray-700' }}">
                                 <i class="bx bx-calendar text-lg"></i>
                                 <span>
                                     {{ $task->start_date ? \Carbon\Carbon::parse($task->start_date)->format('M d') : '' }}
@@ -163,7 +163,6 @@
                                     {{ $task->end_date ? \Carbon\Carbon::parse($task->end_date)->format('M d') : '' }}
                                 </span>
                             </div>
-
                             <!-- Tombol Show -->
                             <button onclick="" class="flex items-center" title="Show"
                                 wire:click="openTaskModal({{ $task->id }})">
@@ -258,7 +257,7 @@
             </div>
 
             <!-- Alerts for Deadline Warnings -->
-            @if ($selectedTask->status->id == 3)
+            @if ($selectedTask->status->id >= 3)
                 <div role="alert" class="bg-green-200 text-black p-4 rounded-xl shadow-md flex items-center space-x-4 mt-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
