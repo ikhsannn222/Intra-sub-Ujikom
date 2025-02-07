@@ -13,7 +13,7 @@
                 + Add Data
             </a>
             <div class="relative w-1/2">
-                <i class='bx bx-search absolute left-3 mt-2  transform  text-black-400'></i>
+                <i class='bx bx-search absolute left-3 mt-2 transform text-black-400'></i>
                 <input type="text"
                     class="pl-10 pr-4 py-2 border border-black-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-500 text-sm w-full"
                     wire:model.live="search" placeholder="Search User...">
@@ -51,6 +51,13 @@
         <div class="w-full overflow-x-auto">
             <table class="w-full whitespace-no-wrap">
                 <thead>
+                    @if($users->isEmpty())
+                    <tr>
+                        <td colspan="5" class="border p-4 text-center text-gray-500">
+                            Data tidak tersedia
+                        </td>
+                    </tr>
+                @else
                     <tr
                         class="text-xs font-semibold tracking-wide text-left text-black-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-black-400 dark:bg-gray-800">
                         <th class="px-4 py-3">Name</th>
@@ -59,6 +66,7 @@
                         <th class="px-4 py-3">Role</th>
                         <th class="px-4 py-3">Action</th>
                     </tr>
+                    @endif
                 </thead>
                 <tbody class="bg-white divide-y dark:divide-black-700 dark:bg-gray-800">
                     @foreach ($users as $user)

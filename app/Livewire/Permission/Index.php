@@ -33,7 +33,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.permission.index', [
-            'permissions' => Permission::where('name','like','%'.$this->search.'%')->paginate(5),
+            'permissions' => Permission::where('id','like','%'.$this->search.'%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')->paginate(5),
         ]);
     }
 

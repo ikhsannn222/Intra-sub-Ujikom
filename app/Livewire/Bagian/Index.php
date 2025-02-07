@@ -31,7 +31,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.bagian.index', [
-            'bagians' => Bagian::where('name', 'like', '%'.$this->search.'%')->paginate(5)
+            'bagians' => Bagian::where('id', 'like', '%'.$this->search.'%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')->paginate(5)
         ]);
     }
 

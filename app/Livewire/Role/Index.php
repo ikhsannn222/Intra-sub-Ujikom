@@ -31,7 +31,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.role.index', [
-            'roles' => Role::where('name', 'like', '%'.$this->search.'%')->paginate(5)
+            'roles' => Role::where('id', 'like', '%'.$this->search.'%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')->paginate(5)
         ]);
     }
 

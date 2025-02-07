@@ -8,7 +8,9 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
-    public $search;
+    use WithPagination; // Diperlukan agar resetPage() bisa digunakan
+
+    public $search = ''; // Beri nilai default agar tidak menyebabkan error
 
     public function destroy($departementId)
     {
@@ -16,24 +18,25 @@ class Index extends Component
 
         if ($departement) {
             $departement->delete();
+
+            // Flash message
+            session()->flash('message', 'Data Berhasil Dihapus.');
         }
 
-        //flash message
-        session()->flash('message', 'Data Berhasil Dihapus.');
-
-        //redirect
+        // Redirect setelah menghapus (bisa dihilangkan jika hanya ingin refresh Livewire)
         return redirect()->route('departement.index');
-    }
-
-    public function render()
-    {
-        return view('livewire.departement.index', [
-            'departements' => Departement::where('name', 'like', '%'.$this->search.'%')->paginate(5)
-        ]);
     }
 
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage(); // Perbaikan: Dengan WithPagination, ini akan berjalan
+    }
+
+    public function render()
+    {
+        $departements = Departement::where('id', 'like', '%' . $this->search . '%')
+        ->orWhere('name', 'like', '%' . $this->search . '%')->paginate(5);
+
+        return view('livewire.departement.index', compact('departements'));
     }
 }

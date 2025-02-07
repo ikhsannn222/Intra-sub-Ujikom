@@ -32,7 +32,9 @@ class Index extends Component
     public function render()
     {
         return view('livewire.task-status.index', [
-            'taskStatus' => TaskStatus::where('name', 'like', '%'.$this->search.'%')->paginate(5),
+            'taskStatus' => TaskStatus::where('id', 'like', '%'.$this->search.'%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')
+            ->orWhere('color', 'like', '%' . $this->search . '%')->paginate(5),
         ]);
     }
 

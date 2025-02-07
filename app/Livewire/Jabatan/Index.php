@@ -29,7 +29,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.jabatan.index', [
-            'jabatans' => Jabatan::where('name', 'like', '%'.$this->search. '%')->paginate(5)
+            'jabatans' => Jabatan::where('id', 'like', '%'.$this->search. '%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')->paginate(5)
         ]);
     }
 

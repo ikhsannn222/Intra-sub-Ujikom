@@ -50,11 +50,19 @@
         <div class="w-full overflow-x-auto">
             <table class="w-full whitespace-no-wrap">
                 <thead>
+                    @if($permissions->isEmpty())
+                    <tr>
+                        <td colspan="5" class="border p-4 text-center text-gray-500">
+                            Data tidak tersedia
+                        </td>
+                    </tr>
+                @else
                     <tr
                         class="text-xs font-semibold tracking-wide text-left text-black-500 uppercase border-b dark:border-black-700 bg-black-50 dark:text-black-400 dark:bg-black-800">
                         <th class="px-4 py-3">Name</th>
                         <th class="px-4 py-3 text-center">Action</th>
                     </tr>
+                    @endif
                 </thead>
                 <tbody class="bg-white divide-y dark:divide-black-700 dark:bg-black-800">
                     @foreach ($permissions as $permission)

@@ -35,12 +35,23 @@ class Index extends Component
 
     public function render()
     {
-        $users = User::where('name','like','%'.$this->search.'%')->paginate(20);
+        $users = User::query()
+            ->where(function ($query) {
+                $query->where('id', 'like', '%' . $this->search . '%') // Cari berdasarkan ID
+                      ->orWhere('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('nrp','like','%'. $this->search . '%')
+                      ->orWhere('email', 'like', '%' . $this->search . '%')
+                      ->orWhereHas('roles', function ($roleQuery) {
+                          $roleQuery->where('name', 'like', '%' . $this->search . '%');
+                      });
+            })
+            ->paginate(5);
 
         return view('livewire.pages.user.index', [
             'users' => $users,
         ]);
     }
+
 
     public function updatingSearch()
     {
