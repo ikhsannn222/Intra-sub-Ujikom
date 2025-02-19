@@ -11,6 +11,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use App\Models\Notification;
+
 
 class KanbanIndex extends Component
 {
@@ -37,6 +39,10 @@ class KanbanIndex extends Component
 
     public $projectStatus;
     public $listeners = ['refreshProject' => 'refreshProjectData'];
+
+    public $tasks;
+    public $newStatusId;
+
 
     public function filter()
     {
@@ -200,15 +206,90 @@ class KanbanIndex extends Component
         $this->editingTaskId = null; // This will close the modal
     }
 
+    // public function updateTaskStatus($taskId, $newStatusId)
+    // {
+    //     $task = Tasks::find($taskId);
+    //     $task->status_id = $newStatusId;
+    //     $task->save();
+
+    //     // Dispatch event to handle notification
+    //     $this->dispatch('taskMoved', taskId: $taskId, newStatusId: $newStatusId);
+
+    //     // Reload statuses to reflect changes
+    //     $this->statuses = TaskStatus::with('tasks')->get();
+    // }
+
+    // Di dalam class KanbanIndex
     public function updateTaskStatus($taskId, $newStatusId)
     {
         $task = Tasks::find($taskId);
+        $user = Auth::user();
+
+        // Simpan status lama sebelum diupdate
+        $oldStatus = $task->status->name;
+
+        // Update status task
+        $task->status_id = $newStatusId;
+        $task->save();
+
+        // Dapatkan status baru
+        $newStatus = TaskStatus::find($newStatusId)->name;
+
+        // Notifikasi untuk Admin jika yang memindahkan adalah Staff
+        if ($user->hasRole('staff')) {
+            $admin = User::role('superadmin')->first();
+            if ($admin) {
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'message' => "Task '{$task->name}' dipindahkan dari {$oldStatus} ke {$newStatus} oleh {$user->name}",
+                    'is_read' => false,
+                ]);
+            }
+        }
+
+        // Notifikasi untuk Staff jika yang memindahkan adalah Admin
+        if ($user->hasRole('admin')) {
+            $staff = $task->responsible; // Pastikan relasi responsible ada di model Task
+            if ($staff) {
+                Notification::create([
+                    'user_id' => $staff->id,
+                    'message' => "Task '{$task->name}' dipindahkan dari {$oldStatus} ke {$newStatus} oleh Admin",
+                    'is_read' => false,
+                ]);
+            }
+        }
+
+        // Reload data status
+        $this->statuses = TaskStatus::with('tasks')->get();
+    }
+
+
+    public function moveTask($taskId, $newStatus)
+    {
+        // Menemukan task berdasarkan ID
+        $task = Tasks::find($taskId);
 
         if ($task) {
-            $task->status_id = $newStatusId;
+            // Update status task ke status baru
+            $task->status_id = $newStatus;
             $task->save();
+
+            // Menemukan admin untuk mengirimkan notifikasi
+            $admin = User::where('role', 'admin')->first(); // Menemukan admin pertama
+
+            if ($admin) {
+                // Membuat notifikasi baru untuk admin
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'message' => "Task {$taskId} telah dipindahkan ke status {$newStatus}",
+                ]);
+            }
+
+            // Emit event untuk memberi tahu komponen lain tentang pemindahan task
+            $this->emit('taskMoved', $taskId, $newStatus);
         }
     }
+
 
     public function refreshProjectData()
     {

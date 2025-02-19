@@ -96,6 +96,10 @@
         </div>
     </div>
 </div>
+<div>
+
+
+
 <div class="flex space-x-4">
     @foreach ($statuses as $status)
         <!-- Kontainer Status -->
@@ -408,6 +412,42 @@
     @endif
 @endcan
 
+<script>
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev, taskId) {
+        if (!@this.get('editingTaskId')) {
+            ev.dataTransfer.setData("taskId", taskId);
+            const element = document.getElementById(`task-${taskId}`);
+            if (element) {
+                element.style.opacity = "0.5";
+                ev.dataTransfer.effectAllowed = "move";
+            }
+        }
+    }
+
+    function drop(ev, newStatusId) {
+        ev.preventDefault();
+        const taskId = ev.dataTransfer.getData("taskId");
+
+        if (!taskId) return; // Cegah error jika tidak ada taskId
+
+        const taskElement = document.getElementById(`task-${taskId}`);
+        const targetContainer = document.getElementById(`status-${newStatusId}`);
+
+        if (taskElement && targetContainer) {
+            taskElement.style.opacity = "1";
+
+            // Pastikan elemen belum ada di dalam target
+            if (!targetContainer.contains(taskElement)) {
+                targetContainer.appendChild(taskElement);
+                @this.call('updateTaskStatus', taskId, newStatusId); // Pastikan Livewire method dipanggil dengan benar
+            }
+        }
+    }
+</script>
 <script>
     function allowDrop(ev) {
         ev.preventDefault();
