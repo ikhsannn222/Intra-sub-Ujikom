@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -21,9 +22,9 @@ class Notifications extends Component
 
     public function loadNotifications()
     {
-        // Hanya mengambil notifikasi yang belum dibaca
         $this->notifications = Notification::where('user_id', auth()->id())
                                            ->whereNull('read_at')
+                                           ->whereDate('created_at', Carbon::today())
                                            ->latest()
                                            ->get();
         $this->unreadCount = $this->notifications->count();
@@ -31,9 +32,9 @@ class Notifications extends Component
 
     public function loadHistory()
     {
-        // Hanya mengambil notifikasi yang sudah dibaca
         $this->history = Notification::where('user_id', auth()->id())
                                      ->whereNotNull('read_at')
+                                     ->whereDate('created_at', Carbon::today())
                                      ->latest()
                                      ->get();
     }
@@ -47,33 +48,33 @@ class Notifications extends Component
                 'read_at' => Carbon::now(),
             ]);
         }
-        // Update tampilan setelah perubahan
         $this->loadNotifications();
         $this->loadHistory();
     }
 
-    public function handleTasksMoved($tasksId, $newStatusId)
+    public function handleTasksMoved($taskId, $newStatusId)
     {
-        $tasks = Tasks::find($tasksId);
+        $task = Tasks::find($taskId);
         $user = auth()->user();
 
-        if ($user->hasRole('staff')) {
-            $admin = User::role('admin')->first();
-            if ($admin) {
-                Notification::create([
-                    'user_id' => $admin->id,
-                    'message' => "Task '{$tasks->name}' telah dipindahkan ke status '{$tasks->status->name}' oleh {$user->name}",
-                    'is_read' => false,
-                ]);
-            }
+        if (!$task || !$user) {
+            return;
         }
 
-        if ($user->hasRole('admin')) {
-            $staff = $tasks->responsible;
-            if ($staff) {
+        if ($user->id == 2) {
+            Notification::create([
+                'user_id' => 1, // Superadmin
+                'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
+                'is_read' => false,
+            ]);
+        }
+
+        if ($user->id == 1) {
+            $responsibleStaff = $task->responsible;
+            if ($responsibleStaff) {
                 Notification::create([
-                    'user_id' => $staff->id,
-                    'message' => "Task '{$tasks->name}' telah dipindahkan ke status '{$tasks->status->name}' oleh {$user->name}",
+                    'user_id' => $responsibleStaff->id,
+                    'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
                     'is_read' => false,
                 ]);
             }
@@ -87,29 +88,57 @@ class Notifications extends Component
         $task = Tasks::find($taskId);
         $user = auth()->user();
 
-        if ($user->hasRole('admin')) {
-            $staff = $task->responsible;
-            if ($staff) {
-                Notification::create([
-                    'user_id' => $staff->id,
-                    'message' => "Task baru '{$task->name}' telah ditambahkan oleh {$user->name}",
-                    'is_read' => false,
-                ]);
-            }
+        if (!$task || !$user || $user->id != 1) {
+            return; // Hanya superadmin yang bisa menambah task
+        }
+
+        $responsibleStaff = $task->responsible;
+        if ($responsibleStaff) {
+            Notification::create([
+                'user_id' => $responsibleStaff->id,
+                'message' => "Task baru '{$task->name}' telah ditambahkan oleh {$user->name}",
+                'is_read' => false,
+            ]);
         }
 
         $this->loadNotifications();
     }
 
-    public function deleteHistory($notificationId)
-{
-    $notification = Notification::find($notificationId);
-    if ($notification) {
-        $notification->delete();
-        $this->loadHistory();
-    }
-}
+    public function handleTaskDeleted($taskId)
+    {
+        $task = Tasks::find($taskId);
+        $user = auth()->user();
 
+        if (!$task || !$user || $user->id != 1) {
+            return; // Hanya superadmin yang bisa menghapus task
+        }
+
+        $responsibleStaff = $task->responsible;
+        if ($responsibleStaff) {
+            Notification::create([
+                'user_id' => $responsibleStaff->id,
+                'message' => "Task '{$task->name}' telah dihapus oleh {$user->name}",
+                'is_read' => false,
+            ]);
+        }
+
+        $task->delete();
+        $this->loadNotifications();
+    }
+
+    public function deleteHistory($notificationId)
+    {
+        $notification = Notification::find($notificationId);
+        if ($notification) {
+            $notification->delete();
+            $this->loadHistory();
+        }
+    }
+
+    public function refreshNotifications()
+    {
+        $this->loadNotifications();
+    }
 
     public function render()
     {
