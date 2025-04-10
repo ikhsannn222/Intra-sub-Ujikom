@@ -22,11 +22,23 @@ class Notifications extends Component
 
     public function loadNotifications()
     {
-        $this->notifications = Notification::where('user_id', auth()->id())
-                                           ->whereNull('read_at')
-                                           ->whereDate('created_at', Carbon::today())
-                                           ->latest()
-                                           ->get();
+        $user = auth()->user();
+
+        $query = Notification::where('user_id', $user->id)
+                             ->whereNull('read_at')
+                             ->whereDate('created_at', Carbon::today());
+
+        // Filter khusus untuk staff
+        if ($user->role === 'superadmin') {
+            $query->where(function ($q) {
+                $q->where('message', 'like', '%memindahkan%')
+                  ->orWhere('message', 'like', '%menambah%')
+                  ->orWhere('message', 'like', '%menghapus%')
+                  ->orWhere('message', 'like', '%merubah%');
+            });
+        }
+
+        $this->notifications = $query->latest()->get();
         $this->unreadCount = $this->notifications->count();
     }
 
@@ -48,82 +60,9 @@ class Notifications extends Component
                 'read_at' => Carbon::now(),
             ]);
         }
+
         $this->loadNotifications();
         $this->loadHistory();
-    }
-
-    public function handleTasksMoved($taskId, $newStatusId)
-    {
-        $task = Tasks::find($taskId);
-        $user = auth()->user();
-
-        if (!$task || !$user) {
-            return;
-        }
-
-        if ($user->id == 2) {
-            Notification::create([
-                'user_id' => 1, // Superadmin
-                'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
-                'is_read' => false,
-            ]);
-        }
-
-        if ($user->id == 1) {
-            $responsibleStaff = $task->responsible;
-            if ($responsibleStaff) {
-                Notification::create([
-                    'user_id' => $responsibleStaff->id,
-                    'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
-                    'is_read' => false,
-                ]);
-            }
-        }
-
-        $this->loadNotifications();
-    }
-
-    public function handleTaskCreated($taskId)
-    {
-        $task = Tasks::find($taskId);
-        $user = auth()->user();
-
-        if (!$task || !$user || $user->id != 1) {
-            return; // Hanya superadmin yang bisa menambah task
-        }
-
-        $responsibleStaff = $task->responsible;
-        if ($responsibleStaff) {
-            Notification::create([
-                'user_id' => $responsibleStaff->id,
-                'message' => "Task baru '{$task->name}' telah ditambahkan oleh {$user->name}",
-                'is_read' => false,
-            ]);
-        }
-
-        $this->loadNotifications();
-    }
-
-    public function handleTaskDeleted($taskId)
-    {
-        $task = Tasks::find($taskId);
-        $user = auth()->user();
-
-        if (!$task || !$user || $user->id != 1) {
-            return; // Hanya superadmin yang bisa menghapus task
-        }
-
-        $responsibleStaff = $task->responsible;
-        if ($responsibleStaff) {
-            Notification::create([
-                'user_id' => $responsibleStaff->id,
-                'message' => "Task '{$task->name}' telah dihapus oleh {$user->name}",
-                'is_read' => false,
-            ]);
-        }
-
-        $task->delete();
-        $this->loadNotifications();
     }
 
     public function deleteHistory($notificationId)
@@ -137,6 +76,75 @@ class Notifications extends Component
 
     public function refreshNotifications()
     {
+        $this->loadNotifications();
+    }
+
+    public function handleTasksMoved($taskId, $newStatusId)
+    {
+        $task = Tasks::find($taskId);
+        $user = auth()->user();
+
+        if (!$task || !$user) return;
+
+        // Jika yang memindahkan staff
+        if ($user->role === 'staff') {
+            $superadmin = \App\Models\User::where('role', 'superadmin')->first();
+            if ($superadmin) {
+                Notification::create([
+                    'user_id' => $superadmin->id,
+                    'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
+                    'is_read' => false,
+                ]);
+            }
+        }
+
+        // jika superadmin yang memindahkan task
+        if ($user->role === 'superadmin' && $task->responsible) {
+            Notification::create([
+                'user_id' => $task->responsible->id,
+                'message' => "Task '{$task->name}' telah dipindahkan ke status '{$newStatusId}' oleh {$user->name}",
+                'is_read' => false,
+            ]);
+        }
+
+        // Refresh notifikasi setelah aksi
+        $this->loadNotifications();
+    }
+
+    public function handleTaskCreated($taskId)
+    {
+        $task = Tasks::find($taskId);
+        $user = auth()->user();
+
+        if (!$task || !$user || $user->role !== 'superadmin') return;
+
+        if ($task->responsible) {
+            Notification::create([
+                'user_id' => $task->responsible->id,
+                'message' => "Task baru '{$task->name}' telah ditambahkan oleh {$user->name}",
+                'is_read' => false,
+            ]);
+        }
+
+        $this->loadNotifications();
+    }
+
+    public function handleTaskDeleted($taskId)
+    {
+        $task = Tasks::find($taskId);
+        $user = auth()->user();
+
+        if (!$task || !$user || $user->role !== 'superadmin') return;
+
+        if ($task->responsible) {
+            Notification::create([
+                'user_id' => $task->responsible->id,
+                'message' => "Task '{$task->name}' telah dihapus oleh {$user->name}",
+                'is_read' => false,
+            ]);
+        }
+
+        $task->delete();
         $this->loadNotifications();
     }
 
