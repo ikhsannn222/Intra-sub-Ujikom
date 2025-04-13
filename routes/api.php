@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KanbanController;
+use App\Http\Controllers\Api\ProjectController;
 
 
 /*
@@ -21,6 +22,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function (){
     Route::post('logout', [AuthController::class, 'logout']);
     Route::resource('task', KanbanController::class)->except(['edit', 'create']);
+    Route::resource('project', ProjectController::class)->except(['edit', 'create']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
