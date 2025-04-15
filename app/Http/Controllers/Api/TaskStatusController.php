@@ -4,20 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Tasks;
+use App\Models\TaskStatus;
 
-class KanbanController extends Controller
+class TaskStatusController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $task = Tasks::with(['owner', 'responsible', 'status', 'project', 'type', 'priority'])->latest()->get();
+        $taskStatus = TaskStatus::latest()->get();
         return response()->json([
             'success' => true,
-            'message' => 'Data Task',
-            'tasks' => $task,
+            'message' => 'Data Task Status',
+            'taskStatus' => $taskStatus,
         ], 200);
     }
 
