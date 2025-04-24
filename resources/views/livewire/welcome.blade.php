@@ -2,7 +2,7 @@
 
     {{-- content --}}
     <div class="container px-6 mx-auto grid">
-        <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+        <h2 class="my-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Dashboard
         </h2>
 
@@ -10,8 +10,8 @@
             <!-- Kolom untuk Jam Digital dan Sambutan -->
             <div class="w-1/2">
                 <!-- Jam Digital Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-                    <p class="text-4xl font-extrabold text-gray-800 dark:text-white" wire:poll.1s="updateClock">
+                <div class="bg-indigo-50 dark:bg-indigo-900 rounded-lg shadow-lg p-6 transition-transform transform hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
+                    <p class="text-4xl font-extrabold text-indigo-800 dark:text-indigo-200" wire:poll.1s="updateClock">
                         {{ now()->format('H:i:s') }}
                     </p>
                     <p class="text-lg text-gray-600 dark:text-gray-300">
@@ -20,21 +20,21 @@
                 </div>
 
                 <!-- Card Sambutan untuk User, tepat di bawah jam digital -->
-                <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-                    <p class="text-2xl text-gray-800 dark:text-gray-200">
+                <div class="mt-4 bg-green-50 dark:bg-green-900 rounded-lg shadow-lg p-6 transition-transform transform hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
+                    <p class="text-2xl text-gray-800 dark:text-gray-100">
                         Selamat datang di halaman dashboard,
                         <span class="text-blue-500 font-semibold">{{ Auth::user()->name }}</span>!
                     </p>
                 </div>
 
                 @if ($totalUsers)
-                    <div class="flex items-center bg-white rounded-lg shadow-md p-4 mt-4">
+                    <div class="flex items-center bg-blue-50 dark:bg-blue-900 rounded-lg shadow-md p-6 mt-4 transition-transform transform hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
                         <div class="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full text-white">
                             <i class='bx bxs-user text-2xl'></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-800">Total User</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $totalUsers }}</p>
+                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Total User</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalUsers }}</p>
                         </div>
                     </div>
                 @endif
@@ -43,16 +43,16 @@
 
             <!-- Kalender Card tetap di sebelah jam digital -->
             <div class="w-1/2">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+                <div class="bg-yellow-50 dark:bg-yellow-900 rounded-lg shadow-lg p-6 transition-transform transform hover:scale-105 hover:shadow-xl duration-300 ease-in-out">
                     <!-- Navigasi Kalender -->
                     <div class="flex items-center justify-between mb-4">
-                        <button wire:click="changeMonth(-1)" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md">
+                        <button wire:click="changeMonth(-1)" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
                            << Prev
                         </button>
                         <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
                             {{ $currentMonthName }} {{ $currentYear }}
                         </h2>
-                        <button wire:click="changeMonth(1)" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md">
+                        <button wire:click="changeMonth(1)" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
                            Next >>
                         </button>
                     </div>
@@ -71,7 +71,8 @@
                                     class="p-2 rounded-md
                                         @if ($date['isToday']) bg-blue-500 text-white font-bold
                                         @elseif ($date['isCurrentMonth']) bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200
-                                        @else bg-gray-200 dark:bg-gray-600 text-gray-400 @endif">
+                                        @else bg-gray-200 dark:bg-gray-600 text-gray-400 @endif
+                                        hover:bg-blue-200 dark:hover:bg-blue-600 transition-all duration-300 ease-in-out">
                                     {{ $date['day'] }}
                                 </div>
                             @endforeach
@@ -84,22 +85,13 @@
         <!-- Cards -->
         <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
             <!-- Card -->
-            {{-- <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-                <div
-                    class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full dark:text-orange-100 dark:bg-orange-500">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z">
-                        </path>
-                    </svg>
+            {{-- <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out">
+                <div class="flex items-center justify-center w-12 h-12 bg-orange-100 dark:bg-orange-500 rounded-full text-orange-500 dark:text-orange-100">
+                    <i class="fas fa-users text-2xl"></i>
                 </div>
-                <div>
-                    <p class="mb-2 text-sm font-medium text-black-600 dark:text-black-400">
-                        Total clients
-                    </p>
-                    <p class="text-lg font-semibold text-gray-700 dark:text-black-200">
-                        6389
-                    </p>
+                <div class="ml-6">
+                    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Total Clients</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">6389</p>
                 </div>
             </div> --}}
         </div>

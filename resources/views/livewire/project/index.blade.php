@@ -119,7 +119,9 @@
                 @foreach ($projects as $project)
                     <tr class="text-gray-700 dark:text-gray-400">
                         <td class="px-4 py-3 text-sm">{{ $project->name }}</td>
-                        <td class="px-4 py-3 text-sm">{!! $project->description !!}</td>
+                        <td class="px-4 py-3 text-sm">
+                            {!! \Illuminate\Support\Str::limit(strip_tags($project->description), 15, '...') !!}
+                        </td>
                         <td class="px-4 py-3 text-sm">{{ $project->owner->name }}</td>
                         <td class="px-4 py-3 text-sm">{{ $project->status->name }}</td>
                         <td class="px-4 py-3">

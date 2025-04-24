@@ -63,7 +63,7 @@
                         <th class="px-4 py-3">Name</th>
                         <th class="px-4 py-3">Content</th>
                         <th class="px-4 py-3">Code</th>
-                        <th class="px-4 py-3">Order</th>
+                        <th class="px-4 py-3">Project</th>
                         <th class="px-4 py-3">Estimation</th>
                         <th class="px-4 py-3">Action</th>
                     </tr>
@@ -73,9 +73,13 @@
                     @foreach ($tasks as $task)
                         <tr class="text-gray-700 dark:text-gray-400">
                             <td class="px-4 py-3 text-sm">{{ $task->name }}</td>
-                            <td class="px-4 py-3 text-sm">{!! $task->content !!}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {!! \Illuminate\Support\Str::limit(strip_tags($task->content), 15, '...') !!}
+                            </td>
                             <td class="px-4 py-3 text-sm">{{ $task->code }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $task->order }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {{ \Illuminate\Support\Str::limit($task->project->name, 20, '...') }}
+                            </td>s
                             <td class="px-4 py-3 text-sm">{{ $task->estimation }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center space-x-4 text-sm">

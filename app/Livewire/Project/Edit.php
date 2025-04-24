@@ -56,17 +56,20 @@ class Edit extends Component
         $project = Project::findOrFail($this->projectId);
 
         if ($this->cover_image) {
-            $this->cover_image->storeAs('public/projects', $this->cover_image->hashName());
+            // Store the cover image and get the file name
+            $imagePath = $this->cover_image->storeAs('public/projects', $this->cover_image->hashName());
 
+            // Update project with new data, including cover image
             $project->update([
                 'name' => $this->name,
                 'description' => $this->description,
                 'owner_id' => $this->owner_id,
                 'status_id' => $this->status_id,
                 'ticket_prefix' => $this->ticket_prefix,
+                'cover_image' => $this->cover_image->hashName(), // Store the image name in database
             ]);
         } else {
-            // Update project with the new data
+            // Update project without changing cover image
             $project->update([
                 'name' => $this->name,
                 'description' => $this->description,
@@ -74,11 +77,9 @@ class Edit extends Component
                 'status_id' => $this->status_id,
                 'ticket_prefix' => $this->ticket_prefix,
             ]);
-
         }
 
         session()->flash('message', 'Data berhasil diupdate');
-
         return redirect()->route('project.index');
     }
 
